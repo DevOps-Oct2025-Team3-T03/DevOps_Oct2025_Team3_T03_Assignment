@@ -1,2 +1,3 @@
 uploads/
-pycache/*
+**/__pycache__/
+*.py[cod]
