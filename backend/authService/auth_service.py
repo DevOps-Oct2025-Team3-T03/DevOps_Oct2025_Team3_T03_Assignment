@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from pymongo import MongoClient
+import gridfs
 from bson.objectid import ObjectId
 import bcrypt
 import uuid
@@ -11,6 +12,8 @@ auth_blueprint = Blueprint("auth", __name__)
 client = MongoClient("mongodb+srv://josephbwanzj_db_user:josephwan1*@mvpcluster.fgzsm9n.mongodb.net/")
 db = client["MVPDatabase"]
 users_col = db["MVPUsers"]
+#files_col = db["MVPFiles"]
+fs = gridfs.GridFS(db)
 
 # In-memory user store for MVP
 # users = {
@@ -56,7 +59,7 @@ def list_users():
         return jsonify({"error": "Forbidden"}), 403
     
     all_users = users_col.find()
-    return jsonify([{"id": str(u["user_id"]), "username": u["username"], "role": u["role"]} for u in all_users])
+    return jsonify([{"user_id": str(u["user_id"]), "username": u["username"], "role": u["role"]} for u in all_users])
     # return jsonify([{"username": u, "role": users[u]["role"]} for u in users])
 
 #Create user (admin only)
@@ -87,13 +90,26 @@ def create_user():
     return jsonify({"status": "created"})
 
 #Delete user (admin only)
-@auth_blueprint.route("/admin/delete_user/<user_id>", methods=["DELETE"])
+@auth_blueprint.route("/admin/delete_user/<user_id>", methods=["POST"])
 def delete_user(user_id):
     if session.get("role") != "admin":
         return jsonify({"error": "Forbidden"}), 403
+    
+    if user_id == session.get("user_id"):
+        return jsonify({"error": "Admin cannot delete themselves"}), 400
 
-    users_col.delete_one({"_id": ObjectId(user_id)})
-    return jsonify({"status": "deleted"})
+    result = users_col.delete_one({"user_id": user_id})
+
+    if result.deleted_count == 0:
+        return jsonify({"error": "User not found"}), 404
+    
+    #files_col.delete_many({"owner_id": user_id})
+    user_files = fs.find({"owner_id": user_id})
+
+    for file in user_files:
+        fs.delete(file._id)
+
+    return jsonify({"status": "User deleted"})
 
 
 # Check if admin already exists
