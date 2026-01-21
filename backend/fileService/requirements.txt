@@ -1,3 +1,6 @@
 Flask
 pymongo
 Flask-Cors
+
+pytest==7.4.3
+pytest-cov==4.1.0
