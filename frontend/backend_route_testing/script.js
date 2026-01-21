@@ -34,7 +34,7 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
 
 // ---------- ADMIN DASHBOARD ----------
 async function loadUsers() {
-  const res = await fetch(`${API_URL}/admin/list_users`, {
+  const res = await fetch(`${API_URL}/admin`, {
     credentials: "include"
   });
   const users = await res.json();

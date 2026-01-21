@@ -53,7 +53,7 @@ def logout():
     return jsonify({"status": "logged out"})
 
 #List users (admin only)
-@auth_blueprint.route("/admin/list_users", methods=["GET"])
+@auth_blueprint.route("/admin", methods=["GET"])
 def list_users():
     if session.get("role") != "admin":
         return jsonify({"error": "Forbidden"}), 403
