@@ -10,7 +10,7 @@ auth_blueprint = Blueprint("auth", __name__)
 
 # MongoDB setup
 client = MongoClient("mongodb+srv://josephbwanzj_db_user:josephwan1*@mvpcluster.fgzsm9n.mongodb.net/")
-db = client["MVPDatabase"]
+db = client["MVPUsers_DB"]
 users_col = db["MVPUsers"]
 #files_col = db["MVPFiles"]
 fs = gridfs.GridFS(db)
@@ -53,7 +53,7 @@ def logout():
     return jsonify({"status": "logged out"})
 
 #List users (admin only)
-@auth_blueprint.route("/admin/list_users", methods=["GET"])
+@auth_blueprint.route("/admin", methods=["GET"])
 def list_users():
     if session.get("role") != "admin":
         return jsonify({"error": "Forbidden"}), 403
@@ -114,9 +114,10 @@ def delete_user(user_id):
 
 # Check if admin already exists
 if users_col.find_one({"username": "admin"}):
-    print("Admin user already exists")
+    print("Existing admin(s) located in the DB.")
 else:
     # Create admin user
+    print("No existing admins found in the DB, creating default admin...")
     admin_user_id = str(uuid.uuid4())
     hashed_pw = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt())
     users_col.insert_one({

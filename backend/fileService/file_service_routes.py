@@ -16,7 +16,7 @@ file_blueprint = Blueprint("files", __name__)
 
 # MongoDB setup
 client = MongoClient("mongodb+srv://josephbwanzj_db_user:josephwan1*@mvpcluster.fgzsm9n.mongodb.net/")
-db = client["MVPDatabase"]
+db = client["MVPFiles_DB"]
 #files_col = db["MVPFiles"]
 fs = gridfs.GridFS(db)
 
