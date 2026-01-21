@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:5000";
+const API_URL_AS = "http://127.0.0.1:5000";
+const API_URL_FS = "http://127.0.0.1:5001";
 
 // ---------- LOGIN ----------
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
@@ -6,7 +7,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(`${API_URL}/login`, {
+  const res = await fetch(`${API_URL_AS}/login`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({username, password}),
@@ -27,14 +28,14 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
 // ---------- LOGOUT ----------
 document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-  await fetch(`${API_URL}/logout`);
+  await fetch(`${API_URL_AS}/logout`);
   localStorage.clear();
   window.location.href = "index.html";
 });
 
 // ---------- ADMIN DASHBOARD ----------
 async function loadUsers() {
-  const res = await fetch(`${API_URL}/admin`, {
+  const res = await fetch(`${API_URL_AS}/admin`, {
     credentials: "include"
   });
   const users = await res.json();
@@ -53,7 +54,7 @@ async function loadUsers() {
         if (!confirm(`Delete user "${u.username}"?`)) return;
 
         const res = await fetch(
-          `${API_URL}/admin/delete_user/${u.user_id}`,
+          `${API_URL_AS}/admin/delete_user/${u.user_id}`,
           {
             method: "POST",
             credentials: "include"
@@ -82,7 +83,7 @@ document.getElementById("createUserForm")?.addEventListener("submit", async (e) 
   const password = document.getElementById("newPassword").value;
   const role = document.getElementById("newRole").value;
 
-  const res = await fetch(`${API_URL}/admin/create_user`, {
+  const res = await fetch(`${API_URL_AS}/admin/create_user`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({username, password, role}),
@@ -102,7 +103,7 @@ if(document.getElementById("usersList")){
 
 // ---------- USER DASHBOARD ----------
 async function loadFiles() {
-  const res = await fetch(`${API_URL}/dashboard`, {
+  const res = await fetch(`${API_URL_FS}/dashboard`, {
     credentials: "include"
   });
   const files = await res.json();
@@ -116,13 +117,13 @@ async function loadFiles() {
     const downloadBtn = document.createElement("button");
     downloadBtn.textContent = "Download";
     downloadBtn.addEventListener("click", () => {
-        window.open(`${API_URL}/dashboard/download/${f.file_id}`, "_blank");
+        window.open(`${API_URL_FS}/dashboard/download/${f.file_id}`, "_blank");
     });
 
     const delBtn = document.createElement("button");
     delBtn.textContent = "Delete";
     delBtn.addEventListener("click", async () => {
-      await fetch(`${API_URL}/dashboard/delete/${f.file_id}`, {method:"POST", credentials: "include"});
+      await fetch(`${API_URL_FS}/dashboard/delete/${f.file_id}`, {method:"POST", credentials: "include"});
       loadFiles();
     });
     li.appendChild(downloadBtn);
@@ -141,7 +142,7 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
     formData.append("files", files[i]); // append each file under same key
   }
 
-  await fetch(`${API_URL}/dashboard/upload`, {
+  await fetch(`${API_URL_FS}/dashboard/upload`, {
     method:"POST", 
     body: formData, credentials: "include"});
   fileInput.value = "";

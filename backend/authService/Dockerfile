@@ -5,14 +5,14 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy backend code
-COPY backend/ ./backend
+COPY backend/authService ./backend
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 # Copy frontend
-COPY frontend/ ./frontend
+COPY ../../frontend ./frontend
 
 # Expose port
 EXPOSE 5000
