@@ -2,7 +2,7 @@
 from flask import Flask
 from flask_cors import CORS
 
-from authService.auth_service_routes import auth_blueprint
+from auth_service_routes import auth_blueprint
 
 app = Flask(__name__)
 app.secret_key = "only-secret-key"
