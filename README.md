@@ -1,12 +1,16 @@
 # DevOps_Oct2025_Team3_T03_Assignment
 
-## Flutter Setup
+## Flutter
 
-### Resources
+Main Flutter code is in flutter*application_frontend/\_lib/main.dart*
+
+### Flutter Setup
+
+#### Resources
 
 Flutter setup docs: https://docs.flutter.dev/install/quick
 
-### Check
+#### Check
 
 1. You have VS Code
 2. You have installed the Flutter extension (Dart extension will be installed as well)
