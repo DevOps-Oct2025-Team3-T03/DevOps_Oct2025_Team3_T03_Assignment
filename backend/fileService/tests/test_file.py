@@ -1,6 +1,6 @@
 """Tests for fileService module."""
 
-import io
+import io, os
 from fileService.app import app
 from unittest.mock import patch, MagicMock
 from werkzeug.datastructures import FileStorage
@@ -208,7 +208,7 @@ class TestFileService:
         with client.session_transaction() as sess:
             sess["user_id"] = "user1"
             sess["username"] = "user1"
-        with open("tests/test_file.txt", "rb") as f:
+        with open(os.path.join(os.path.dirname(__file__), "test_file.txt"), "rb") as f:
             res = client.post(
                 "/dashboard/upload",
                 data={"files": (f, "test_file.txt")},
@@ -235,7 +235,7 @@ class TestFileService:
         with client.session_transaction() as sess:
             sess["user_id"] = "user1"
             sess["username"] = "user1"
-        with open("tests/test_file.txt", "rb") as f:
+        with open(os.path.join(os.path.dirname(__file__), "test_file.txt"), "rb") as f:
             upload_res = client.post(
                 "/dashboard/upload",
                 data={"files": (f, "test_file.txt")},
@@ -256,7 +256,7 @@ class TestFileService:
         with client.session_transaction() as sess:
             sess["user_id"] = "user1"
             sess["username"] = "user1"
-        with open("tests/test_file.txt", "rb") as f:
+        with open(os.path.join(os.path.dirname(__file__), "test_file.txt"), "rb") as f:
             upload_res = client.post(
                 "/dashboard/upload",
                 data={"files": (f, "test_file.txt")},
@@ -276,7 +276,7 @@ class TestFileService:
         with client.session_transaction() as sess:
             sess["user_id"] = "user1"
             sess["username"] = "user1"
-        with open("tests/test_file.txt", "rb") as f:
+        with open(os.path.join(os.path.dirname(__file__), "test_file.txt"), "rb") as f:
             upload_res = client.post(
                 "/dashboard/upload",
                 data={"files": (f, "test_file.txt")},
@@ -297,7 +297,7 @@ class TestFileService:
         with client.session_transaction() as sess:
             sess["user_id"] = "user1"
             sess["username"] = "user1"
-        with open("tests/test_file.txt", "rb") as f:
+        with open(os.path.join(os.path.dirname(__file__), "test_file.txt"), "rb") as f:
             upload_res = client.post(
                 "/dashboard/upload",
                 data={"files": (f, "test_file.txt")},

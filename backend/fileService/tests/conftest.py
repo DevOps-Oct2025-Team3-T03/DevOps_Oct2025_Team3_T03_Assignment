@@ -16,6 +16,17 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
+@pytest.fixture(scope="session", autouse=True)
+def ensure_test_file():
+    test_file_path = os.path.join(os.path.dirname(__file__), "test_file.txt")
+    if not os.path.exists(test_file_path):
+        with open(test_file_path, "w") as f:
+            f.write("test file\n")
+    yield
+    # Optionally, cleanup after tests (uncomment if you want to remove after tests)
+    # if os.path.exists(test_file_path):
+    #     os.remove(test_file_path)
+
 def _cleanup_test_files():
     # Remove all files owned by test users
     for owner_id in ["user1", "user2", "u_user1", "u_user2", "u_user_1"]:
