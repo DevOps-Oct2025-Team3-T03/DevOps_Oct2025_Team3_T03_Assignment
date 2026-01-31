@@ -119,7 +119,7 @@ else:
     # Create admin user
     print("No existing admins found in the DB, creating default admin...")
     admin_user_id = str(uuid.uuid4())
-    hashed_pw = bcrypt.hashpw("admin123".encode(), bcrypt.gensalt())
+    hashed_pw = bcrypt.hashpw("AdminPass123!".encode(), bcrypt.gensalt())
     users_col.insert_one({
         "user_id": admin_user_id,
         "username": "admin",

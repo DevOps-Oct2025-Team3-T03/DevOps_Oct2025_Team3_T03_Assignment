@@ -5,17 +5,19 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy backend code
-COPY backend/authService ./backend
-COPY requirements.txt .
+COPY backend ./backend
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/authService/requirements.txt
 
 # Copy frontend
 COPY ../../frontend ./frontend
+
+# Add backend to Python path
+ENV PYTHONPATH=/app/backend
 
 # Expose port
 EXPOSE 5000
 
 # Run the backend
-CMD ["python", "backend/app.py"]
+CMD ["python", "backend/authService/app.py"]
