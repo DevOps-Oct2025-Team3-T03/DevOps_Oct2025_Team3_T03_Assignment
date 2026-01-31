@@ -5,17 +5,19 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy backend code
-COPY backend/fileService ./backend
-COPY requirements.txt .
+COPY backend ./backend
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r backend/requirements.txt
+RUN pip install --no-cache-dir -r backend/fileService/requirements.txt
 
 # Copy frontend
 COPY ../../frontend ./frontend
+
+# Add backend to Python path
+ENV PYTHONPATH=/app/backend
 
 # Expose port
 EXPOSE 5001
 
 # Run the backend
-CMD ["python", "backend/app.py"]
+CMD ["python", "backend/fileService/app.py"]
