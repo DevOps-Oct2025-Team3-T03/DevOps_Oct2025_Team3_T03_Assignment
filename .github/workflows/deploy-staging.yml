@@ -1,0 +1,76 @@
+name: Deploy to Staging
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+
+    # Manual approval gate
+    environment:
+      name: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Test authService
+      - name: Test authService
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/authService/requirements.txt
+          pytest backend/authService/tests -v
+
+      # Test fileService
+      - name: Test fileService
+        run: |
+          pip install -r backend/fileService/requirements.txt
+          pytest backend/fileService/tests -v
+
+      # Build Docker images
+      - name: Build authService image
+        run: docker build -t authservice:${{ steps.version.outputs.version }} backend/authService
+
+      - name: Build fileService image
+        run: docker build -t fileservice:${{ steps.version.outputs.version }} backend/fileService
+
+      # Deploy (example placeholder)
+      - name: Deploy to staging
+        run: |
+          echo "Deploying version ${{ steps.version.outputs.version }}"
+          docker run -d -p 5000:5000 authservice:${{ steps.version.outputs.version }}
+          docker run -d -p 5001:5000 fileservice:${{ steps.version.outputs.version }}
+
+      # Telegram notification — SUCCESS
+      - name: Telegram Notify (Success)
+        if: success()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d text=" STAGING DEPLOY SUCCESS\nRepo: ${{ github.repository }}\nVersion: ${{ steps.version.outputs.version }}"
+
+      # Telegram notification — FAILURE
+      - name: Telegram Notify (Failure)
+        if: failure()
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+          -d text=" STAGING DEPLOY FAILED\nRepo: ${{ github.repository }}"
