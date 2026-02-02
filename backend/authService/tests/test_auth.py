@@ -122,7 +122,7 @@ class TestAuthService:
             "password": b"existinghashed"
         }
 
-        with patch("authService.auth_service_routes.users_col.find_one", side_effect=[fake_existing_user, None]), \
+        with patch("authService.auth_service_routes.users_col.find_one", return_value = None), \
              patch("authService.auth_service_routes.bcrypt.hashpw", return_value=b"newhashed"), \
              patch("authService.auth_service_routes.users_col.insert_one") as mock_insert:
             res = client.post("/admin/create_user", json={
@@ -209,7 +209,7 @@ class TestAuthService:
             res = client.post("/admin/delete_user/existinguser")
             assert res.status_code == 200
             data = res.get_json()
-            assert "message" in data
+            assert "status" in data
             mock_delete.assert_called_once()
 
     def test_admin_delete_user_not_found_unit(self, client):
@@ -255,6 +255,7 @@ class TestAuthService:
     def test_logout_as_user_unit(self, client):
         with client.session_transaction() as sess:
             sess["role"] = "user"
+            sess["user_id"] = "some_user_id"
         res = client.get("/logout")
         assert res.status_code == 200
         data = res.get_json()
@@ -263,6 +264,7 @@ class TestAuthService:
     def test_logout_as_admin_unit(self, client):
         with client.session_transaction() as sess:
             sess["role"] = "admin"
+            sess["user_id"] = "some_user_id"
         res = client.get("/logout")
         assert res.status_code == 200
         data = res.get_json()
@@ -270,7 +272,7 @@ class TestAuthService:
 
     def test_logout_unauthorized_unit(self, client):
         res = client.get("/logout")
-        assert res.status_code == 403
+        assert res.status_code == 401
         data = res.get_json()
         assert "error" in data
     
@@ -420,6 +422,8 @@ class TestAuthService:
         assert "error" in data # verify response JSON contains error message
 
     def test_admin_delete_user_without_login(self, client, temp_user):
+        with client.session_transaction() as sess:
+            sess.clear()
         # Attempt to delete a user without login
         res = client.post(f"/admin/delete_user/{temp_user['user_id']}")
         assert res.status_code == 403 # verify forbidden access
@@ -450,7 +454,7 @@ class TestAuthService:
             "role": "user"
         })
         assert res.status_code == 200
-        assert res.get_json()["status"] == "created"
+        assert res.get_json()["status"] == "User created"
 
         # list -> id
         res = admin_client.get("/admin")

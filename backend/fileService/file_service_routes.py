@@ -5,6 +5,9 @@ from pymongo import MongoClient
 import gridfs
 from bson.objectid import ObjectId
 from datetime import datetime
+import io
+from flask import send_file
+from bson import ObjectId
 
 file_blueprint = Blueprint("files", __name__)
 
@@ -58,8 +61,12 @@ def upload_file():
 @file_blueprint.route("/dashboard", methods=["GET"])
 def list_files():
     user_id = session.get("user_id")
+    role = session.get("role");
     if not user_id:
         return jsonify({"error": "Unauthorized"}), 401
+    
+    if role == "admin":
+        return jsonify({"error": "Forbidden"}), 403
 
     files = []
     for f in fs.find({"owner_id": user_id}):
@@ -71,9 +78,6 @@ def list_files():
 
     return jsonify(files)
 
-import io
-from flask import send_file
-from bson import ObjectId
 
 @file_blueprint.route("/dashboard/download/<file_id>", methods=["GET"])
 def download_file(file_id):

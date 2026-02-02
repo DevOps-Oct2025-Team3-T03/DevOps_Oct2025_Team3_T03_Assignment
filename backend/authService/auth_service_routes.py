@@ -32,6 +32,9 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
+    if not username or not password:
+        return jsonify({"error": "Invalid credentials"}), 401
+
     user = users_col.find_one({"username": username})
     if not user or not bcrypt.checkpw(password.encode(), user["password"]):
         return jsonify({"error": "Invalid credentials"}), 401
@@ -49,8 +52,11 @@ def login():
 #Logout
 @auth_blueprint.route("/logout", methods=["GET"])
 def logout():
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
     session.clear()
-    return jsonify({"status": "logged out"})
+    return jsonify({"status": "logged out"}), 200
 
 #List users (admin only)
 @auth_blueprint.route("/admin", methods=["GET"])
@@ -73,6 +79,9 @@ def create_user():
     password = data.get("password")
     role = data.get("role", "user")  # default to regular user
 
+    if not username or not password:
+        return jsonify({"error": "Invalid input"}), 400
+
     if users_col.find_one({"username": username}):
         return jsonify({"error": "User already exists"}), 400
     
@@ -87,7 +96,7 @@ def create_user():
         "role": role,
         "created_at": datetime.utcnow()
     })
-    return jsonify({"status": "created"})
+    return jsonify({"status": "User created"})
 
 #Delete user (admin only)
 @auth_blueprint.route("/admin/delete_user/<user_id>", methods=["POST"])
@@ -97,6 +106,10 @@ def delete_user(user_id):
     
     if user_id == session.get("user_id"):
         return jsonify({"error": "Admin cannot delete themselves"}), 400
+    
+    user = users_col.find_one({"user_id": user_id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
 
     result = users_col.delete_one({"user_id": user_id})
 
@@ -109,7 +122,7 @@ def delete_user(user_id):
     for file in user_files:
         fs.delete(file._id)
 
-    return jsonify({"status": "User deleted"})
+    return jsonify({"status": "User deleted"}), 200
 
 
 # Check if admin already exists
