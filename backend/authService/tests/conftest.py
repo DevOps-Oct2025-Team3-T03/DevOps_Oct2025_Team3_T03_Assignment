@@ -43,7 +43,7 @@ def temp_user(admin_client):
     })
 
     assert res.status_code == 200
-    assert res.get_json()["status"] == "created"
+    assert res.get_json()["status"] == "User created"
 
     # get user_id
     res = admin_client.get("/admin")

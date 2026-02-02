@@ -186,7 +186,7 @@ class TestFileService:
     # User Dashboard Integration Tests
     def test_user_dashboard_as_unauthorized(self, client):
         res = client.get("/dashboard")
-        assert res.status_code == 403
+        assert res.status_code == 401
         data = res.get_json()
         assert "error" in data
 
