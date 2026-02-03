@@ -6,4 +6,4 @@ Steps to run app.py:
 2. Open two terminal, each terminal type in:
 - python -m fileService.app
 - python -m authService.app
-3. Launch index.html via Live server
+3. Launch index.html via Live servera
