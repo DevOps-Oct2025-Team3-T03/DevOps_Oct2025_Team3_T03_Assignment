@@ -26,6 +26,10 @@ fs = gridfs.GridFS(db)
 #UPLOAD_FOLDER = "/uploads"  # For MVP, store files locally
 
 # -------- Routes --------
+@file_blueprint.route("/health")
+def health():
+    return "OK", 200
+
 @file_blueprint.route("/dashboard/upload", methods=["POST"])
 def upload_file():
     user_id = session.get("user_id")

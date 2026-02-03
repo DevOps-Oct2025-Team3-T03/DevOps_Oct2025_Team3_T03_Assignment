@@ -25,6 +25,10 @@ fs = gridfs.GridFS(db)
 
 # -------- Routes --------
 
+@auth_blueprint.route("/health")
+def health():
+    return "OK", 200
+
 # Login
 @auth_blueprint.route("/login", methods=["POST"])
 def login():
