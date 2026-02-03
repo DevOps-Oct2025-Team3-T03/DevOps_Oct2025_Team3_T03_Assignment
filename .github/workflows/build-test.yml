@@ -6,9 +6,9 @@ on:
   pull_request:
     branches: [main, develop]
 
-# Set default permissions for the workflow
+# Allow creating releases with GitHub Actions
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
