@@ -1,9 +1,27 @@
+// importing flutter material package
+// this includes all the material design components
+// that can be used for free in UI development
 import 'package:flutter/material.dart';
 
+// the main function is a global function
+// the runApp function takes the given widget
+// and inflates it to fill the screen of the device
+// function in runApp() = what you see on screen
 void main() {
   runApp(const MyApp());
 }
 
+// Run application with "flutter run". 
+// hot reload: press r in the command line, or press the "hot reload button in a Flutter supported IDE
+//   hot reload reloads the app without resetting states, 
+//   e.g. int clickCounter = 27, after hot reload: int clickCounter = 27, no resetting of state
+// hot restart press R in the command line, or press the "hot restart" button in a Flutter supported IDE
+//   hot restart restarts the app and resets states as well. 
+//   e.g. int clickCounter = 27, after hot restart: int clickCounter = 0, state is reset
+
+// StatelessWidget = immutable widget
+// Stateless widgets are used to create UI elements that do not change dynamically over time
+// as the name suggests, they are static and do not maintain any internal state
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
