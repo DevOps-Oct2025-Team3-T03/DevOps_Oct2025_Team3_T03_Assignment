@@ -47,7 +47,7 @@ jobs:
         run: |
           python app.py &
           sleep 10  # Wait for app to start
-          echo "Application started on http://localhost:5000"
+          echo " Application started on http://localhost:5000"
       
       # Step 5: Verify application is running (Auth Service)
       - name: Verify application is running 
@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-fullscan-reports
+          name: zap-fullscan-auth-reports
           path: |
             report_html.html
             report_json.json
@@ -149,7 +149,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: zap-fullscan-reports
+          name: zap-fullscan-file-reports
           path: |
             report_html.html
             report_json.json
