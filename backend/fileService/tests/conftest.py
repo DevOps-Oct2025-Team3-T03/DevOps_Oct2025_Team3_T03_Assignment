@@ -23,9 +23,9 @@ def ensure_test_file():
         with open(test_file_path, "w") as f:
             f.write("test file\n")
     yield
-    # Optionally, cleanup after tests (uncomment if you want to remove after tests)
-    # if os.path.exists(test_file_path):
-    #     os.remove(test_file_path)
+    
+    if os.path.exists(test_file_path):
+        os.remove(test_file_path)
 
 def _cleanup_test_files():
     # Remove all files owned by test users
