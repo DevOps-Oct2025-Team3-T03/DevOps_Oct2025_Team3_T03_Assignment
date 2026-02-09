@@ -143,4 +143,4 @@ password: AdminPass123!
 ## Notes
 - Session-based authentication secures all API endpoints.  
 - File uploads stored securely in GridFS.  
-- Admin users manage user roles and monitor system activity.
+- Admin users manage user roles and monitor system activities.
