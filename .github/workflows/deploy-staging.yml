@@ -48,6 +48,7 @@ jobs:
           pytest backend/fileService/tests -v
 
       # Build Docker images
+      # force docker
       - name: Build authService image
         run: docker build -f backend/authService/Dockerfile -t authservice:${{ steps.version.outputs.version }} .
 
