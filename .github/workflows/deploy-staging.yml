@@ -49,10 +49,10 @@ jobs:
 
       # Build Docker images
       - name: Build authService image
-        run: docker build -t authservice:${{ steps.version.outputs.version }} backend/authService
+        run: docker build -f backend/authService/Dockerfile -t authservice:${{ steps.version.outputs.version }} .
 
       - name: Build fileService image
-        run: docker build -t fileservice:${{ steps.version.outputs.version }} backend/fileService
+        run: docker build -f backend/fileService/Dockerfile -t fileservice:${{ steps.version.outputs.version }} .
 
       # Deploy (example placeholder)
       - name: Deploy to staging
