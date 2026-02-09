@@ -48,7 +48,7 @@ jobs:
           pytest backend/fileService/tests -v
 
       # Build Docker images
-      # force docker
+      # -f is for file, it specifies to Docker to only look at the specified file, backend/authService/Dockerfile for example
       - name: Build authService image
         run: docker build -f backend/authService/Dockerfile -t authservice:${{ steps.version.outputs.version }} .
 
