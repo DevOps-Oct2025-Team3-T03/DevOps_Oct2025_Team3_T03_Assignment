@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 
 auth_blueprint = Blueprint("auth", __name__)
-
+##
 # MongoDB setup
 client = MongoClient("mongodb+srv://josephbwanzj_db_user:josephwan1*@mvpcluster.fgzsm9n.mongodb.net/")
 db = client["MVPUsers_DB"]
