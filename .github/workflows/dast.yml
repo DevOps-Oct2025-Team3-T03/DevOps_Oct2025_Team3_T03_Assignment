@@ -155,3 +155,39 @@ jobs:
             report_json.json
             report_md.md
 
+      # Notification: DAST SUCCESS
+      - name: Notify QA Channel - DAST Passed
+        if: success()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: LOW
+          title: DAST Dynamic Security Scan Completed
+          message: |
+            OWASP ZAP dynamic scanning completed successfully!
+            Services scanned:
+            - authService (port 5000)
+            - fileService (port 5001)
+            No critical vulnerabilities detected.
+            Review detailed reports in GitHub artifacts.
+          workflow_name: DAST - Live Application Scan
+          repo: ${{ github.repository }}
+          status: success
+
+      # Notification: DAST FAILURE (Vulnerabilities Found)
+      - name: Notify QA Channel - DAST Issues Detected
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: HIGH
+          title: DAST Security Issues Detected
+          message: |
+            OWASP ZAP found potential security vulnerabilities in running application!
+            Action Required: Review vulnerability reports immediately
+            Potential issues: XSS, CSRF, Authentication flaws, SQL Injection risks
+            Download detailed ZAP reports from GitHub artifacts and review with QA team
+          workflow_name: DAST - Live Application Scan
+          repo: ${{ github.repository }}
+          status: failure
+

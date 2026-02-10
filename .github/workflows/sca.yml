@@ -62,3 +62,36 @@ jobs:
         with:
           sarif_file: reports/dependency-check-report.sarif
           category: sca
+
+      # Notification: SCA SUCCESS
+      - name: Notify QA Channel - SCA Passed
+        if: success()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: LOW
+          title: SCA Dependency Scan Passed
+          message: |
+            OWASP Dependency-Check completed successfully!
+            All dependencies are below CVSS 7.0 threshold.
+            Reports available in GitHub artifacts.
+          workflow_name: SCA - Dependency Security Scan
+          repo: ${{ github.repository }}
+          status: success
+
+      # Notification: SCA FAILURE (Vulnerable Dependencies Found)
+      - name: Notify QA Channel - Vulnerable Dependencies Detected
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: CRITICAL
+          title: Vulnerable Dependencies Detected (CVSS >= 7.0)
+          message: |
+            CRITICAL: High-risk vulnerabilities found in dependencies!
+            Action Required: Review dependency-check reports immediately
+            Update vulnerable packages to patched versions
+            Review scan results in GitHub artifacts/security tab
+          workflow_name: SCA - Dependency Security Scan
+          repo: ${{ github.repository }}
+          status: failure

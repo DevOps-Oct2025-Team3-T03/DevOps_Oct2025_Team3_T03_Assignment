@@ -72,3 +72,34 @@ jobs:
             **To Approve:** Edit → Publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Notification: Build & Test SUCCESS
+      - name: Notify Dev Channel - Build Success
+        if: success()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: BUILD
+          severity: LOW
+          title: Build & Tests Passed
+          message: |
+            All tests passed successfully!
+            RC Version: ${{ steps.version.outputs.rc_version }}
+            Ready for QA security scanning
+          workflow_name: CI - AuthService + FileService
+          repo: ${{ github.repository }}
+          status: success
+
+      # Notification: Build & Test FAILURE
+      - name: Notify Dev Channel - Build Failed
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: BUILD
+          severity: HIGH
+          title: Build or Tests Failed
+          message: |
+            Build/Test pipeline failed!
+            Check the logs and fix the breaking changes.
+            Workflow: ${{ github.workflow }}
+          workflow_name: CI - AuthService + FileService
+          repo: ${{ github.repository }}
+          status: failure
