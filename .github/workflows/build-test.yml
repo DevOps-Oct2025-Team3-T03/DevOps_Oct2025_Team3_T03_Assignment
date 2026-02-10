@@ -44,7 +44,7 @@ jobs:
         run: |
           pytest backend/fileService/tests -v
 
-      - name: 🏷️ Generate RC Version
+      - name: Generate RC Version
         id: version
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
@@ -53,14 +53,14 @@ jobs:
           echo "rc_version=${RC_VERSION}" >> $GITHUB_OUTPUT
           echo "RC Version: ${RC_VERSION}"
 
-      - name: 📊 Upload Test Report
+      - name: Upload Test Report
         uses: actions/upload-artifact@v4
         with:
            name: test-report-${{ steps.version.outputs.rc_version }}
            path: htmlcov/
            retention-days: 7
 
-      - name: 📤 Create Draft Release
+      - name: Create Draft Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.rc_version }}
