@@ -49,4 +49,4 @@ jobs:
         run: |
           git push origin main
           git push origin ${{ steps.tag.outputs.release_tag }}
-          echo "✅ Merged and tagged!"
+          echo "Merged and tagged!"

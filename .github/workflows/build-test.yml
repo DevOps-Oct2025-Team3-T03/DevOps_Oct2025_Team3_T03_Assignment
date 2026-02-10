@@ -106,6 +106,3 @@ jobs:
           workflow_name: CI - AuthService + FileService
           repo: ${{ github.repository }}
           status: failure
-          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
-          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
-          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
