@@ -96,6 +96,9 @@ jobs:
           workflow_name: Deploy to Staging
           repo: ${{ github.repository }}
           status: success
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
 
       # Notification: DEPLOYMENT FAILURE to DevOps Channel
       - name: Notify DevOps Channel - Deployment Failed
@@ -115,4 +118,7 @@ jobs:
           workflow_name: Deploy to Staging
           repo: ${{ github.repository }}
           status: failure
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
 

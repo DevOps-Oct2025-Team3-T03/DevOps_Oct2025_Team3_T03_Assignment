@@ -1,0 +1,165 @@
+name: 'Send Slack Notification'
+description: 'Send granular notifications to appropriate Slack channels based on alert type'
+
+inputs:
+  alert_type:
+    description: 'Type of alert: SECURITY, BUILD, DEPLOYMENT, INFO'
+    required: true
+  severity:
+    description: 'Severity level: CRITICAL, HIGH, MEDIUM, LOW, INFO'
+    required: true
+  title:
+    description: 'Alert title'
+    required: true
+  message:
+    description: 'Alert message details'
+    required: true
+  workflow_name:
+    description: 'GitHub workflow name'
+    required: true
+  repo:
+    description: 'Repository name'
+    required: true
+  status:
+    description: 'Status: success, failure, warning'
+    required: false
+    default: 'info'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Route Alert to Correct Channel
+      id: routing
+      shell: bash
+      env:
+        ALERT_TYPE: ${{ inputs.alert_type }}
+        SEVERITY: ${{ inputs.severity }}
+      run: |
+        alertType="${ALERT_TYPE}"
+        severity="${SEVERITY}"
+        
+        # Color coding based on severity
+        case "$severity" in
+          CRITICAL) color="#FF0000" emoji="🔴" ;;
+          HIGH) color="#FF6600" emoji="🟠" ;;
+          MEDIUM) color="#FFAA00" emoji="🟡" ;;
+          LOW) color="#00AA00" emoji="🟢" ;;
+          *) color="#0066CC" emoji="🔵" ;;
+        esac
+        
+        # Determine webhook secret based on alert type
+        if [ "$alertType" = "SECURITY" ]; then
+          webhookSecret="SLACK_QA_WEBHOOK"
+        elif [ "$alertType" = "BUILD" ]; then
+          webhookSecret="SLACK_DEV_WEBHOOK"
+        else
+          webhookSecret="SLACK_DEVOPS_WEBHOOK"
+        fi
+        
+        echo "color=$color" >> $GITHUB_OUTPUT
+        echo "emoji=$emoji" >> $GITHUB_OUTPUT
+        echo "webhook_secret=$webhookSecret" >> $GITHUB_OUTPUT
+
+    - name: Send Slack Notification
+      shell: bash
+      env:
+        WEBHOOK_SECRET: ${{ steps.routing.outputs.webhook_secret }}
+        EMOJI: ${{ steps.routing.outputs.emoji }}
+        COLOR: ${{ steps.routing.outputs.color }}
+        TITLE: ${{ inputs.title }}
+        MESSAGE: ${{ inputs.message }}
+        WORKFLOW: ${{ inputs.workflow_name }}
+        REPO: ${{ inputs.repo }}
+        BRANCH: ${{ github.ref_name }}
+        COMMIT_SHA: ${{ github.sha }}
+        ACTOR: ${{ github.actor }}
+        SLACK_QA_WEBHOOK: ${{ inputs.slack_qa_webhook }}
+        SLACK_DEV_WEBHOOK: ${{ inputs.slack_dev_webhook }}
+        SLACK_DEVOPS_WEBHOOK: ${{ inputs.slack_devops_webhook }}
+      run: |
+        # Get webhook URL from secrets based on routing
+        webhookUrl=""
+        if [ "$WEBHOOK_SECRET" = "SLACK_QA_WEBHOOK" ]; then
+          webhookUrl="$SLACK_QA_WEBHOOK"
+        elif [ "$WEBHOOK_SECRET" = "SLACK_DEV_WEBHOOK" ]; then
+          webhookUrl="$SLACK_DEV_WEBHOOK"
+        else
+          webhookUrl="$SLACK_DEVOPS_WEBHOOK"
+        fi
+        
+        # Extract short commit SHA
+        commitSha="${COMMIT_SHA:0:7}"
+        
+        # Build Slack message JSON
+        payload=$(cat <<'PAYLOAD'
+        {
+          "attachments": [
+            {
+              "color": "COLOR_PLACEHOLDER",
+              "title": "EMOJI_PLACEHOLDER TITLE_PLACEHOLDER",
+              "text": "MESSAGE_PLACEHOLDER",
+              "fields": [
+                {
+                  "title": "Workflow",
+                  "value": "WORKFLOW_PLACEHOLDER",
+                  "short": true
+                },
+                {
+                  "title": "Repository",
+                  "value": "REPO_PLACEHOLDER",
+                  "short": true
+                },
+                {
+                  "title": "Branch",
+                  "value": "BRANCH_PLACEHOLDER",
+                  "short": true
+                },
+                {
+                  "title": "Commit",
+                  "value": "COMMIT_PLACEHOLDER",
+                  "short": true
+                },
+                {
+                  "title": "Triggered By",
+                  "value": "ACTOR_PLACEHOLDER",
+                  "short": true
+                },
+                {
+                  "title": "Run ID",
+                  "value": "RUN_PLACEHOLDER",
+                  "short": false
+                }
+              ],
+              "ts": TIMESTAMP_PLACEHOLDER
+            }
+          ]
+        }
+        PAYLOAD
+        )
+        
+        # Replace placeholders with actual values
+        payload="${payload//COLOR_PLACEHOLDER/$COLOR}"
+        payload="${payload//EMOJI_PLACEHOLDER/$EMOJI}"
+        payload="${payload//TITLE_PLACEHOLDER/$TITLE}"
+        payload="${payload//MESSAGE_PLACEHOLDER/$MESSAGE}"
+        payload="${payload//WORKFLOW_PLACEHOLDER/$WORKFLOW}"
+        payload="${payload//REPO_PLACEHOLDER/$REPO}"
+        payload="${payload//BRANCH_PLACEHOLDER/$BRANCH}"
+        payload="${payload//COMMIT_PLACEHOLDER/$commitSha}"
+        payload="${payload//ACTOR_PLACEHOLDER/$ACTOR}"
+        payload="${payload//RUN_PLACEHOLDER/${{ github.server_url }}\/$REPO\/actions\/runs\/${{ github.run_id }}}"
+        payload="${payload//TIMESTAMP_PLACEHOLDER/$(date +%s)}"
+        
+        # Send to Slack
+        if [ -n "$webhookUrl" ]; then
+          echo "Sending notification to $WEBHOOK_SECRET"
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data "$payload" \
+            "$webhookUrl" \
+            || echo "Warning: Failed to send Slack notification"
+        else
+          echo "Error: Webhook URL not found for secret: $WEBHOOK_SECRET"
+          exit 1
+        fi
+

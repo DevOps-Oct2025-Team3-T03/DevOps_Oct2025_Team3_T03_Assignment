@@ -87,6 +87,9 @@ jobs:
           workflow_name: CI - AuthService + FileService
           repo: ${{ github.repository }}
           status: success
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
 
       # Notification: Build & Test FAILURE
       - name: Notify Dev Channel - Build Failed
@@ -103,3 +106,6 @@ jobs:
           workflow_name: CI - AuthService + FileService
           repo: ${{ github.repository }}
           status: failure
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}

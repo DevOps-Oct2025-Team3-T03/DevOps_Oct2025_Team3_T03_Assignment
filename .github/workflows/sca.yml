@@ -78,6 +78,9 @@ jobs:
           workflow_name: SCA - Dependency Security Scan
           repo: ${{ github.repository }}
           status: success
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
 
       # Notification: SCA FAILURE (Vulnerable Dependencies Found)
       - name: Notify QA Channel - Vulnerable Dependencies Detected
@@ -95,3 +98,6 @@ jobs:
           workflow_name: SCA - Dependency Security Scan
           repo: ${{ github.repository }}
           status: failure
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
