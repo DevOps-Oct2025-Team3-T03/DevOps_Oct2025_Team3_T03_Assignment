@@ -1,3 +1,4 @@
+# Automated workflow to create a PR from develop to main upon release publication
 name: Create PR & Merge to Main
 
 on:
