@@ -50,3 +50,41 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: sast
+
+      # Notification: SAST SUCCESS
+      - name: Notify QA Channel - SAST Passed
+        if: success()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: LOW
+          title: SAST Security Scan Completed - No Critical Issues
+          message: |
+            CodeQL SAST analysis completed successfully!
+            No critical or high-severity vulnerabilities detected.
+            Review full scan results in GitHub Security tab.
+          workflow_name: SAST - Code Security Scan
+          repo: ${{ github.repository }}
+          status: success
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
+
+      # Notification: SAST FAILURE (Issues Found)
+      - name: Notify QA Channel - SAST Issues Detected
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: SECURITY
+          severity: HIGH
+          title: SAST Security Issues Detected
+          message: |
+            CodeQL SAST analysis found potential security vulnerabilities!
+            Action Required: Review security findings in GitHub Security tab
+            Check code for: SQL Injection, XSS, Insecure Deserialization, etc.
+          workflow_name: SAST - Code Security Scan
+          repo: ${{ github.repository }}
+          status: failure
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}

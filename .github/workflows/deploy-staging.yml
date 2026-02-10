@@ -77,3 +77,48 @@ jobs:
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
           -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
           -d text=" STAGING DEPLOY FAILED\nRepo: ${{ github.repository }}"
+
+      # Notification: DEPLOYMENT SUCCESS to DevOps Channel
+      - name: Notify DevOps Channel - Deployment Success
+        if: success()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: DEPLOYMENT
+          severity: LOW
+          title: Staging Deployment Successful
+          message: |
+            Staging deployment completed successfully!
+            Version: ${{ steps.version.outputs.version }}
+            Services running:
+            - authService on port 5000
+            - fileService on port 5001
+            All systems operational.
+          workflow_name: Deploy to Staging
+          repo: ${{ github.repository }}
+          status: success
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
+
+      # Notification: DEPLOYMENT FAILURE to DevOps Channel
+      - name: Notify DevOps Channel - Deployment Failed
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          alert_type: DEPLOYMENT
+          severity: HIGH
+          title: Staging Deployment Failed
+          message: |
+            Staging deployment failed!
+            Version: ${{ steps.version.outputs.version }}
+            Investigation required:
+            - Check test results (authService & fileService)
+            - Verify Docker image builds
+            - Review deployment logs for errors
+          workflow_name: Deploy to Staging
+          repo: ${{ github.repository }}
+          status: failure
+          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
+          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
+          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
+
