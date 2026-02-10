@@ -6,10 +6,11 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   merge:
-    name: Merge to main
+    name: Create PR to main
     runs-on: ubuntu-latest
 
     steps:
@@ -17,28 +18,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: develop
 
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions@github.com"
-
-      - name: Prepare main branch
-        run: |
-          git fetch origin develop
-          if ! git rev-parse --verify origin/main >/dev/null 2>&1; then
-            git checkout -b main
-            git push origin main
-          else
-            git checkout main
-          fi
-
-      - name: Merge develop → main
-        run: |
-          git fetch origin develop
-          git merge origin/develop --no-ff -m "Release approved"
-
-      - name: Push to GitHub
-        run: |
-          git push origin main
-          echo "Merged and tagged!"
+      - name: Create PR (develop → main)
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          branch: release/merge-develop-to-main
+          title: "Release approved: merge develop into main"
+          body: |
+            Automated PR created from a published release.
+            Source: develop
+            Target: main
