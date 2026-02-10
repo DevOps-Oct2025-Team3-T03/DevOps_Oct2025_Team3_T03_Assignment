@@ -1,4 +1,4 @@
-name: Approval & Merge to Main
+name: Create PR & Merge to Main
 
 on:
   release:

@@ -2,8 +2,7 @@ name: CD - Deploy to Staging
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
 
 permissions:
   contents: read
