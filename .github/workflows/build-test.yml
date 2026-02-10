@@ -1,5 +1,6 @@
 name: CI - AuthService + FileService
 
+# Trigger on pushes to develop and pull requests to main and develop
 on:
   push:
     branches: [develop]
