@@ -1,9 +1,8 @@
-name: Deploy to Staging
+name: CD - Deploy to Staging
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: read
