@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [main, develop]
 
-# Allow creating releases with GitHub Actions
+# Allow creating releases
 permissions:
   contents: write
 
