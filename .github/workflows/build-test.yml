@@ -4,12 +4,18 @@ on:
   push:
     branches: [develop]
   pull_request:
-    branches: [develop]
+    branches: [main, develop]
+
+# Allow creating releases with GitHub Actions
+permissions:
+  contents: write
 
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    outputs:
+      rc_version: ${{ steps.version.outputs.rc_version }}
 
     steps:
       - name: Checkout code
@@ -38,6 +44,34 @@ jobs:
         run: |
           pytest backend/fileService/tests -v
 
+      - name: Generate RC Version
+        id: version
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          RC_VERSION="v0.0.0-rc.${TIMESTAMP}.${SHORT_SHA}"
+          echo "rc_version=${RC_VERSION}" >> $GITHUB_OUTPUT
+          echo "RC Version: ${RC_VERSION}"
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+           name: test-report-${{ steps.version.outputs.rc_version }}
+           path: htmlcov/
+           retention-days: 7
+
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.rc_version }}
+          draft: true
+          body: |
+            # Release Candidate
+            **Version:** ${{ steps.version.outputs.rc_version }}
+            **Status:** Waiting for team approval
+            **To Approve:** Edit → Publish release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Notification: Build & Test SUCCESS
       - name: Notify Dev Channel - Build Success
         if: success()
@@ -48,6 +82,7 @@ jobs:
           title: Build & Tests Passed
           message: |
             All tests passed successfully!
+            RC Version: ${{ steps.version.outputs.rc_version }}
             Ready for QA security scanning
           workflow_name: CI - AuthService + FileService
           repo: ${{ github.repository }}
@@ -71,6 +106,3 @@ jobs:
           workflow_name: CI - AuthService + FileService
           repo: ${{ github.repository }}
           status: failure
-          slack_qa_webhook: ${{ secrets.SLACK_QA_WEBHOOK }}
-          slack_dev_webhook: ${{ secrets.SLACK_DEV_WEBHOOK }}
-          slack_devops_webhook: ${{ secrets.SLACK_DEVOPS_WEBHOOK }}
