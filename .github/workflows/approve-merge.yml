@@ -22,12 +22,11 @@ jobs:
           ref: develop
 
       - name: Create PR (develop → main)
-        uses: peter-evans/create-pull-request@v6
-        with:
-          base: main
-          branch: release/merge-develop-to-main
-          title: "Release approved: merge develop into main"
-          body: |
-            Automated PR created from a published release.
-            Source: develop
-            Target: main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base main \
+            --head develop \
+            --title "Release approved: merge develop into main" \
+            --body "Automated PR created from a published release."
