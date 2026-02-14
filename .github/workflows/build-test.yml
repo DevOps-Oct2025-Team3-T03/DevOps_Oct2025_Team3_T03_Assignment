@@ -80,7 +80,7 @@ jobs:
         with:
           alert_type: BUILD
           severity: LOW
-          title: Build & Tests Passed
+          title: Build and Tests Passed
           message: |
             All tests passed successfully!
             RC Version: ${{ steps.version.outputs.rc_version }}

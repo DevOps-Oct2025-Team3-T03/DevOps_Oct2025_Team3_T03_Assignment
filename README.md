@@ -131,6 +131,57 @@ password: AdminPass123!
 
 ---
 
+## Setup Instructions
+
+1. Configure repository secrets
+
+```bash
+SLACK_QA_WEBHOOK=<incoming-webhook-url>
+SLACK_DEV_WEBHOOK=<incoming-webhook-url>
+SLACK_DEVOPS_WEBHOOK=<incoming-webhook-url>
+TELEGRAM_BOT_TOKEN=<bot-token>
+TELEGRAM_CHAT_ID=<chat-id>
+```
+
+2. Configure branch protection for `main`
+
+- Require pull requests
+- Require status checks (CI workflow)
+- Require approvals (as needed)
+- Require conversation resolution before merging
+- Do not allow bypassing the above settings
+- Enable auto-merge if you want approved PRs to merge automatically
+
+3. Verify workflows and actions
+
+- `.github/workflows/build-test.yml`
+- `.github/workflows/approve-merge.yml`
+- `.github/workflows/deploy-staging.yml`
+- `.github/workflows/sast.yml`
+- `.github/workflows/sca.yml`
+- `.github/workflows/dast.yml`
+- `.github/actions/notify-slack/action.yml`
+
+---
+
+## CI/CD Pipeline Execution Flow
+
+1. Push to `develop` or open a PR to `develop`/`main`
+- CI runs tests and creates a draft release (RC tag)
+- SAST/SCA/DAST security scans run
+
+2. Publish the draft release
+- Triggers PR creation from `develop` to `main`
+
+3. Approve and merge the PR (or let auto-merge handle it)
+- If pull request not created, create own pull-request from `develop` to `main`
+- Updates `main`
+
+4. Deploy to staging
+- `deploy-staging.yml` runs on `main` updates
+
+---
+
 ## DevSecOps Practices
 
 - **Static Application Security Testing (SAST)**: Scans source code for common vulnerabilities.  
