@@ -21,12 +21,25 @@ jobs:
           fetch-depth: 0
           ref: develop
 
-      - name: Create PR (develop → main)
+      - name: Create or Update PR (develop → main)
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr create \
-            --base main \
-            --head develop \
-            --title "Release approved: merge develop into main" \
-            --body "Automated PR created from a published release."
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --base main --head develop --json number --jq '.[0].number')
+          
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists. Updating description."
+            gh pr edit "$EXISTING_PR" \
+              --title "Release approved: merge develop into main" \
+              --body "Automated PR updated from a published release."
+            echo "✅ Existing PR updated successfully"
+          else
+            echo "No existing PR found. Creating new PR."
+            gh pr create \
+              --base main \
+              --head develop \
+              --title "Release approved: merge develop into main" \
+              --body "Automated PR created from a published release."
+            echo "✅ New PR created successfully"
+          fi
