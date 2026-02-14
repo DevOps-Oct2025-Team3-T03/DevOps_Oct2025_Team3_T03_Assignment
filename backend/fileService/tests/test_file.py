@@ -173,6 +173,7 @@ class TestFileService:
 
         fake_gridout = MagicMock()
         fake_gridout._id = "507f1f77bcf86cd799439011"
+        fake_gridout.filename = "test_file.txt"
 
         with patch("fileService.file_service_routes.fs.find_one", return_value=fake_gridout), \
              patch("fileService.file_service_routes.fs.delete") as mock_delete:

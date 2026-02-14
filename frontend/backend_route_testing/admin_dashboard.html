@@ -10,8 +10,20 @@
       <button id="logoutBtn">Logout</button>
       <h2>Admin Dashboard</h2>
 
-      <h3>Users</h3>
-      <ul id="usersList"></ul>
+      <!-- Link to logging/monitoring dashboard -->
+      <div class="logs-link">
+        <a href="logging_dashboard.html">View Logs & Metrics</a>
+      </div>
+
+      <div class="users-card">
+        <div class="section-header">
+          <h3>Users</h3>
+          <button id="refreshUsersBtn">Refresh</button>
+        </div>
+        <div class="scroll-container">
+          <ul id="usersList"></ul>
+        </div>
+      </div>
 
       <h3>Create User</h3>
       <form id="createUserForm">
