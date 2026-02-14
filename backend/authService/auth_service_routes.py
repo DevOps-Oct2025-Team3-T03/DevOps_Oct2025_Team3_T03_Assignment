@@ -158,7 +158,7 @@ def get_auth_logs():
             "username": log["username"],
             "action": log["action"],
             "details": log.get("details", ""),
-            "timestamp": log["timestamp"].isoformat()
+            "timestamp": log["timestamp"].isoformat() + "Z"
         }
         for log in logs
     ])

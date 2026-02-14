@@ -146,7 +146,7 @@ def get_file_logs():
             "username": log["username"],
             "action": log["action"],
             "filename": log.get("filename", ""),
-            "timestamp": log["timestamp"].isoformat()
+            "timestamp": log["timestamp"].isoformat()  + "Z"
         }
         for log in logs
     ])

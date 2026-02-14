@@ -28,7 +28,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
 // ---------- LOGOUT ----------
 document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-  await fetch(`${API_URL_AS}/logout`);
+  await fetch(`${API_URL_AS}/logout`, { credentials: 'include' });
   localStorage.clear();
   window.location.href = "index.html";
 });
