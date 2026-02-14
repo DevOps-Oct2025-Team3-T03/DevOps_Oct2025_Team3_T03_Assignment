@@ -130,7 +130,8 @@ def delete_file(file_id):
         return jsonify({"error": "File not found or access denied"}), 404
 
     fs.delete(ObjectId(file_id))
-    log_file_action(user_id, session.get("username"), "File Delete", file.filename)
+    filename = str(getattr(file, "filename", file_id))
+    log_file_action(user_id, session.get("username"), "File Delete", filename)
     return jsonify({"status": "File deleted"})
 
 # Admin: Fetch File Logs

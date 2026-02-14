@@ -115,7 +115,7 @@ def create_user():
         "role": role,
         "created_at": datetime.utcnow()
     })
-    log_action(session["user_id"], session["username"], "Create User", f"Created user {username}")
+    log_action(session.get("user_id"), session.get("username"), "Create User", f"Created user {username}")
     return jsonify({"status": "User created"})
 
 #Delete user (admin only)
@@ -142,7 +142,7 @@ def delete_user(user_id):
     for file in user_files:
         fs.delete(file._id)
 
-    log_action(session["user_id"], session["username"], "Delete User", f"Deleted user {user['username']}")
+    log_action(session.get("user_id"), session.get("username"), "Delete User", f"Deleted user {user.get('username', user_id)}")
     return jsonify({"status": "User deleted"}), 200
 
 

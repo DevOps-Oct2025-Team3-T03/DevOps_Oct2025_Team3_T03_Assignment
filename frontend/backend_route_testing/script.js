@@ -103,6 +103,10 @@ if (document.getElementById("usersList")) {
   loadUsers();
 }
 
+document.getElementById("refreshUsersBtn")?.addEventListener("click", () => {
+  loadUsers();
+});
+
 // ---------- USER DASHBOARD ----------
 async function loadFiles() {
   const res = await fetch(`${API_URL_FS}/dashboard`, {
