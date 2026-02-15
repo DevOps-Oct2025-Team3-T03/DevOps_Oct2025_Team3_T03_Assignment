@@ -145,7 +145,7 @@ jobs:
             Staging deployment failed!
             Version: ${{ steps.version.outputs.version }}
             Investigation required:
-            - Check test results (authService & fileService)
+            - Check test results (authService and fileService)
             - Verify Docker image builds
             - Review deployment logs for errors
           workflow_name: Deploy to Staging
