@@ -10,7 +10,7 @@ permissions:
 jobs:
   deploy:
     name: Deploy to Staging
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     # Manual approval gate
     environment:
