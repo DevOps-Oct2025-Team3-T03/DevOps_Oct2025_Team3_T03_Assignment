@@ -10,7 +10,7 @@ permissions:
 jobs:
   deploy:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     # Manual approval gate
     environment:
@@ -76,11 +76,10 @@ jobs:
       - name: Push fileService image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
 
-      # Set up Kubeconfig
-      - name: Set up kubeconfig
+      # Create namespace if it doesn't exist
+      - name: Create namespace
         run: |
-          echo "${{ secrets.KUBE_CONFIG_STAGING }}" > kubeconfig.yml
-          export KUBECONFIG=kubeconfig.yml
+          kubectl create namespace mvp-staging --dry-run=client -o yaml | kubectl apply -f -
 
       # Deploy manifests to Kubernetes
       - name: Apply Kubernetes manifests
@@ -92,14 +91,14 @@ jobs:
       # Update image tags in deployments
       - name: Update deployment images
         run: |
-          kubectl set image deployment/authservice authservice=${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }}
-          kubectl set image deployment/fileservice fileservice=${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
+          kubectl set image deployment/authservice authservice=${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} -n mvp-staging
+          kubectl set image deployment/fileservice fileservice=${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} -n mvp-staging
       
       # Wait for rollout to complete
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/authservice
-          kubectl rollout status deployment/fileservice
+          kubectl rollout status deployment/authservice -n mvp-staging
+          kubectl rollout status deployment/fileservice -n mvp-staging
 
       # Telegram notification — SUCCESS
       - name: Telegram Notify (Success)
