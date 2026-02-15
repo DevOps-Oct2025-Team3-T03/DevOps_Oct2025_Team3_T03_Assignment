@@ -38,22 +38,6 @@ jobs:
       #   with:
       #     python-version: "3.11"
 
-      - name: Setup System Python
-        run: |
-          # Replace with YOUR actual Python path
-          $pythonPath = "C:\Users\JosephBWan\AppData\Local\Programs\Python\Python314"
-          
-          if (Test-Path $pythonPath) {
-            Write-Host "Using Python at: $pythonPath"
-            & "$pythonPath\python.exe" --version
-            Add-Content -Path $env:GITHUB_PATH -Value $pythonPath
-            Add-Content -Path $env:GITHUB_PATH -Value "$pythonPath\Scripts"
-          } else {
-            Write-Host "ERROR: Python not found at $pythonPath"
-            exit 1
-          }
-        shell: powershell
-
       # Test authService
       - name: Test authService
         run: |
@@ -79,6 +63,12 @@ jobs:
       - name: Build fileService image
         run: docker build -f backend/fileService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} .
         shell: powershell
+
+      - name: Load images into kind
+        run: |
+          kind load docker-image authservice:${{ steps.version.outputs.version }} --name mvp-cluster
+          kind load docker-image fileservice:${{ steps.version.outputs.version }} --name mvp-cluster
+
       # Deploy (example placeholder)
       #- name: Deploy to staging
       # run: |
@@ -118,8 +108,8 @@ jobs:
       # Update image tags in deployments
       - name: Update deployment images
         run: |
-          kubectl set image deployment/authservice authservice=${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} -n mvp-staging
-          kubectl set image deployment/fileservice fileservice=${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} -n mvp-staging
+          kubectl set image deployment/authservice authservice=authservice:${{ steps.version.outputs.version }} -n mvp-staging
+          kubectl set image deployment/fileservice fileservice=fileservice:${{ steps.version.outputs.version }} -n mvp-staging
         shell: powershell
 
       # Wait for rollout to complete
