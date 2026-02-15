@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Logs & Metrics</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav>
+        <h2>Logging Dashboard</h2>
+        <div id="BacktoAdmin">
+            <a href="admin_dashboard.html">Back to Admin Dashboard</a>
+        </div>   
+    </nav>
+
+    <section class="log-card">
+        <div class="log-header">
+            <h3>Authentication Service Logs</h3>
+            <button id="refreshAuthLogsBtn">Refresh</button>
+        </div>
+        <div class="log-container">
+            <ul id="authLogsList"></ul>
+        </div>
+    </section>
+
+    <section class="log-card">
+        <div class="log-header">
+            <h3>File Service Logs</h3>
+            <button id="refreshFileLogsBtn">Refresh</button>
+        </div>
+        <div class="log-container">
+            <ul id="fileLogsList"></ul>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
+</html>

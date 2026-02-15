@@ -14,6 +14,7 @@ db = client["MVPUsers_DB"]
 users_col = db["MVPUsers"]
 #files_col = db["MVPFiles"]
 fs = gridfs.GridFS(db)
+logs_col = db["MVPUsers_Logs"]
 
 # In-memory user store for MVP
 # users = {
@@ -21,7 +22,14 @@ fs = gridfs.GridFS(db)
 #     "user1": {"password": "user123", "role": "user"},
 # }
 
-
+def log_action(user_id, username, action, details=""):
+    logs_col.insert_one({
+        "timestamp": datetime.utcnow(),
+        "user_id": user_id,
+        "username": username,
+        "action": action,
+        "details": details
+    })
 
 # -------- Routes --------
 
@@ -37,10 +45,12 @@ def login():
     password = data.get("password")
 
     if not username or not password:
+        log_action(None, username, "Login failed with missing credentials")
         return jsonify({"error": "Invalid credentials"}), 401
 
     user = users_col.find_one({"username": username})
     if not user or not bcrypt.checkpw(password.encode(), user["password"]):
+        log_action(None, username, "Login failed with invalid credentials")
         return jsonify({"error": "Invalid credentials"}), 401
 
     #user = users.get(username)
@@ -51,15 +61,20 @@ def login():
     session["username"] = username
     session["role"] = user["role"]
     session["user_id"] = str(user["user_id"])
+    log_action(str(user["user_id"]), username, "Login successful")
     return jsonify({"username": username, "role": user["role"], "user_id": str(user["user_id"])})
 
 #Logout
 @auth_blueprint.route("/logout", methods=["GET"])
 def logout():
+    user_id = session.get("user_id")
+    username = session.get("username")
     if "user_id" not in session:
+        log_action(None, None, "Unauthorized logout")
         return jsonify({"error": "Unauthorized"}), 401
 
     session.clear()
+    log_action(user_id, username, "Logged out")
     return jsonify({"status": "logged out"}), 200
 
 #List users (admin only)
@@ -100,6 +115,7 @@ def create_user():
         "role": role,
         "created_at": datetime.utcnow()
     })
+    log_action(session.get("user_id"), session.get("username"), "Create User", f"Created user {username}")
     return jsonify({"status": "User created"})
 
 #Delete user (admin only)
@@ -126,8 +142,26 @@ def delete_user(user_id):
     for file in user_files:
         fs.delete(file._id)
 
+    log_action(session.get("user_id"), session.get("username"), "Delete User", f"Deleted user {user.get('username', user_id)}")
     return jsonify({"status": "User deleted"}), 200
 
+
+# Admin: Fetch Auth Logs
+@auth_blueprint.route("/admin/logs", methods=["GET"])
+def get_auth_logs():
+    if session.get("role") != "admin":
+        return jsonify({"error": "Forbidden"}), 403
+
+    logs = list(logs_col.find().sort("timestamp", -1))
+    return jsonify([
+        {
+            "username": log["username"],
+            "action": log["action"],
+            "details": log.get("details", ""),
+            "timestamp": log["timestamp"].isoformat() + "Z"
+        }
+        for log in logs
+    ])
 
 # Check if admin already exists
 if users_col.find_one({"username": "admin"}):

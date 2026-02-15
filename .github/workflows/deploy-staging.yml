@@ -56,11 +56,44 @@ jobs:
         run: docker build -f backend/fileService/Dockerfile -t fileservice:${{ steps.version.outputs.version }} .
 
       # Deploy (example placeholder)
-      - name: Deploy to staging
+      #- name: Deploy to staging
+      # run: |
+        #  echo "Deploying version ${{ steps.version.outputs.version }}"
+         # docker run -d -p 5000:5000 authservice:${{ steps.version.outputs.version }}
+         # docker run -d -p 5001:5001 fileservice:${{ steps.version.outputs.version }}
+
+      # Log in to registry (Docker Hub / GHCR)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Push images to registry
+      - name: Push authService image
+        run: docker push authservice:${{ steps.version.outputs.version }}
+
+      - name: Push fileService image
+        run: docker push fileservice:${{ steps.version.outputs.version }}
+
+      # Set up Kubeconfig
+      - name: Set up kubeconfig
         run: |
-          echo "Deploying version ${{ steps.version.outputs.version }}"
-          docker run -d -p 5000:5000 authservice:${{ steps.version.outputs.version }}
-          docker run -d -p 5001:5000 fileservice:${{ steps.version.outputs.version }}
+          echo "${{ secrets.KUBE_CONFIG_STAGING }}" > kubeconfig.yml
+          export KUBECONFIG=kubeconfig.yml
+
+      # Deploy manifests to Kubernetes
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/authservice-deployment.yml
+          kubectl apply -f k8s/fileservice-deployment.yml
+          kubectl apply -f k8s/services.yml
+
+      # Restart deployments to use the new image tags
+      - name: Restart deployments
+        run: |
+          kubectl rollout restart deployment authservice
+          kubectl rollout restart deployment fileservice
 
       # Telegram notification — SUCCESS
       - name: Telegram Notify (Success)

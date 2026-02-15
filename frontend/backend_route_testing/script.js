@@ -28,7 +28,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
 
 // ---------- LOGOUT ----------
 document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-  await fetch(`${API_URL_AS}/logout`);
+  await fetch(`${API_URL_AS}/logout`, { credentials: 'include' });
   localStorage.clear();
   window.location.href = "index.html";
 });
@@ -103,6 +103,10 @@ if (document.getElementById("usersList")) {
   loadUsers();
 }
 
+document.getElementById("refreshUsersBtn")?.addEventListener("click", () => {
+  loadUsers();
+});
+
 // ---------- USER DASHBOARD ----------
 async function loadFiles() {
   const res = await fetch(`${API_URL_FS}/dashboard`, {
@@ -159,3 +163,67 @@ document.getElementById("uploadForm")?.addEventListener("submit", async (e) => {
 if (document.getElementById("fileList")) {
   loadFiles();
 }
+
+function formatTimestamp(isoString) {
+    const d = new Date(isoString);
+    const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+    };
+    return d.toLocaleString(undefined, options); // uses browser locale
+}
+
+// ---------- LOGS DASHBOARD ----------
+async function loadAuthLogs() {
+    const list = document.getElementById("authLogsList");
+    if (!list) return;
+    const res = await fetch(`${API_URL_AS}/admin/logs`, { credentials: "include" });
+    const logs = await res.json();
+    
+    
+    list.innerHTML = "";
+    logs.forEach(log => {
+        const li = document.createElement("li");
+        li.textContent = `[${formatTimestamp(log.timestamp)}] ${log.username}: ${log.action} | ${log.details}`;
+        list.appendChild(li);
+    });
+}
+
+async function loadFileLogs() {
+    const list = document.getElementById("fileLogsList");
+    if (!list) return;
+    const res = await fetch(`${API_URL_FS}/admin/logs`, { credentials: "include" });
+    const logs = await res.json();
+    
+    list.innerHTML = "";
+    logs.forEach(log => {
+        const li = document.createElement("li");
+        li.textContent = `[${formatTimestamp(log.timestamp)}] ${log.username}: ${log.action} | ${log.filename}`;
+        list.appendChild(li);
+    });
+}
+
+// Auto-load logs if dashboard is present
+if(document.getElementById("authLogsList")) loadAuthLogs();
+if(document.getElementById("fileLogsList")) loadFileLogs();
+
+// Manual refresh buttons
+document.getElementById("refreshAuthLogsBtn")?.addEventListener("click", () => {
+    loadAuthLogs();
+});
+
+document.getElementById("refreshFileLogsBtn")?.addEventListener("click", () => {
+    loadFileLogs();
+});
+
+// Set interval for refreshed updates
+setInterval(() => {
+    loadAuthLogs();
+    loadFileLogs();
+}, 10000); // every 10 seconds
+
+

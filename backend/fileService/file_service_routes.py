@@ -22,8 +22,18 @@ client = MongoClient("mongodb+srv://josephbwanzj_db_user:josephwan1*@mvpcluster.
 db = client["MVPFiles_DB"]
 #files_col = db["MVPFiles"]
 fs = gridfs.GridFS(db)
+logs_col = db["MVPFiles_Logs"]
 
 #UPLOAD_FOLDER = "/uploads"  # For MVP, store files locally
+
+def log_file_action(user_id, username, action, filename=""):
+    logs_col.insert_one({
+        "timestamp": datetime.utcnow(),
+        "user_id": user_id,
+        "username": username,
+        "action": action,
+        "filename": filename
+    })
 
 # -------- Routes --------
 @file_blueprint.route("/health")
@@ -59,6 +69,7 @@ def upload_file():
             "file_id": str(file_id),
             "filename": file.filename
         })
+        log_file_action(user_id, username, "File Upload", file.filename)
 
     return jsonify({"files": saved_files})
 
@@ -97,6 +108,7 @@ def download_file(file_id):
     if not file:
         return jsonify({"error": "File not found or access denied"}), 404
 
+    log_file_action(user_id, session.get("username"), "File Download", file.filename)
     return send_file(
         io.BytesIO(file.read()),
         download_name=file.filename,
@@ -118,8 +130,26 @@ def delete_file(file_id):
         return jsonify({"error": "File not found or access denied"}), 404
 
     fs.delete(ObjectId(file_id))
+    filename = str(getattr(file, "filename", file_id))
+    log_file_action(user_id, session.get("username"), "File Delete", filename)
     return jsonify({"status": "File deleted"})
 
+# Admin: Fetch File Logs
+@file_blueprint.route("/admin/logs", methods=["GET"])
+def get_file_logs():
+    if session.get("role") != "admin":
+        return jsonify({"error": "Forbidden"}), 403
+
+    logs = list(logs_col.find().sort("timestamp", -1))
+    return jsonify([
+        {
+            "username": log["username"],
+            "action": log["action"],
+            "filename": log.get("filename", ""),
+            "timestamp": log["timestamp"].isoformat()  + "Z"
+        }
+        for log in logs
+    ])
 
 
 # Previous version of storing files uploaded by user locally in the project's local repository which may not be accessible to all users. 
