@@ -15,7 +15,10 @@ jobs:
     # Manual approval gate
     environment:
       name: staging
-
+    # SHORT_SHA=$(git rev-parse --short HEAD)
+    # VERSION="v0.0.0-${SHORT_SHA}"
+    # echo "version=${VERSION}" >> $GITHUB_OUTPUT
+    # echo "Deploying version: ${VERSION}"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,12 +26,11 @@ jobs:
       - name: Get version from commit 
         id: version
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          VERSION="v0.0.0-${SHORT_SHA}"
+          $SHORT_SHA = git rev-parse --short HEAD
+          $VERSION = "v0.0.0-$SHORT_SHA"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$VERSION"
           Write-Host "Deploying version: $VERSION"
-        # echo "version=${VERSION}" >> $GITHUB_OUTPUT
-        # echo "Deploying version: ${VERSION}"
+          
         shell: powershell
 
       - name: Setup Python
