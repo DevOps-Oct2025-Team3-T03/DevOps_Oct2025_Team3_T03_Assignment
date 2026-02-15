@@ -33,7 +33,7 @@ jobs:
             gh pr edit "$EXISTING_PR" \
               --title "Release approved: merge develop into main" \
               --body "Automated PR updated from a published release."
-            echo "✅ Existing PR updated successfully"
+            echo "Existing PR updated successfully"
           else
             echo "No existing PR found. Creating new PR."
             gh pr create \
@@ -41,5 +41,5 @@ jobs:
               --head develop \
               --title "Release approved: merge develop into main" \
               --body "Automated PR created from a published release."
-            echo "✅ New PR created successfully"
+            echo "New PR created successfully"
           fi
