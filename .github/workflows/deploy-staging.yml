@@ -38,15 +38,20 @@ jobs:
       #   with:
       #     python-version: "3.11"
 
-      # Skip setup-python, use system Python
       - name: Setup System Python
         run: |
-          $pythonPath = (Get-Command python).Source | Split-Path
-          Write-Host "Using Python at: $pythonPath"
-          python --version
-          pip --version
-          Add-Content -Path $env:GITHUB_PATH -Value $pythonPath
-          Add-Content -Path $env:GITHUB_PATH -Value "$pythonPath\Scripts"
+          # Replace with YOUR actual Python path
+          $pythonPath = "C:\Users\JosephBWan\AppData\Local\Programs\Python\Python314"
+          
+          if (Test-Path $pythonPath) {
+            Write-Host "Using Python at: $pythonPath"
+            & "$pythonPath\python.exe" --version
+            Add-Content -Path $env:GITHUB_PATH -Value $pythonPath
+            Add-Content -Path $env:GITHUB_PATH -Value "$pythonPath\Scripts"
+          } else {
+            Write-Host "ERROR: Python not found at $pythonPath"
+            exit 1
+          }
         shell: powershell
 
       # Test authService
