@@ -27,7 +27,7 @@ jobs:
           VERSION="v0.0.0-${SHORT_SHA}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Deploying version: ${VERSION}"
-        shell: pwsh
+        shell: powershell
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -40,7 +40,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/authService/requirements.txt
           pytest backend/authService/tests -v
-        shell: pwsh
+        shell: powershell
 
       # Test fileService
       - name: Test fileService
@@ -48,17 +48,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/fileService/requirements.txt
           pytest backend/fileService/tests -v
-        shell: pwsh
+        shell: powershell
 
       # Build Docker images
       # -f is for file, it specifies to Docker to only look at the specified file, backend/authService/Dockerfile for example
       - name: Build authService image
         run: docker build -f backend/authService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} .
-        shell: pwsh
+        shell: powershell
 
       - name: Build fileService image
         run: docker build -f backend/fileService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} .
-        shell: pwsh
+        shell: powershell
       # Deploy (example placeholder)
       #- name: Deploy to staging
       # run: |
@@ -79,13 +79,13 @@ jobs:
 
       - name: Push fileService image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
-        shell: pwsh
+        shell: powershell
 
       # Create namespace if it doesn't exist
       - name: Create namespace
         run: |
           kubectl create namespace mvp-staging --dry-run=client -o yaml | kubectl apply -f -
-        shell: pwsh
+        shell: powershell
 
       # Deploy manifests to Kubernetes
       - name: Apply Kubernetes manifests
@@ -93,21 +93,21 @@ jobs:
           kubectl apply -f k8s/authservice-deployment.yml
           kubectl apply -f k8s/fileservice-deployment.yml
           kubectl apply -f k8s/services.yml
-        shell: pwsh
+        shell: powershell
 
       # Update image tags in deployments
       - name: Update deployment images
         run: |
           kubectl set image deployment/authservice authservice=${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} -n mvp-staging
           kubectl set image deployment/fileservice fileservice=${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} -n mvp-staging
-        shell: pwsh
+        shell: powershell
 
       # Wait for rollout to complete
       - name: Wait for rollout
         run: |
           kubectl rollout status deployment/authservice -n mvp-staging
           kubectl rollout status deployment/fileservice -n mvp-staging
-        shell: pwsh
+        shell: powershell
 
       # Telegram notification — SUCCESS
       - name: Telegram Notify (Success)
@@ -119,7 +119,7 @@ jobs:
             text = $message
           }
           Invoke-RestMethod -Uri "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -Method Post -Body $body
-        shell: pwsh
+        shell: powershell
       
       # Telegram notification — FAILURE
       - name: Telegram Notify (Failure)
@@ -131,7 +131,7 @@ jobs:
             text = $message
           }
           Invoke-RestMethod -Uri "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -Method Post -Body $body
-        shell: pwsh
+        shell: powershell
 
       # # Telegram notification — SUCCESS
       # - name: Telegram Notify (Success)
