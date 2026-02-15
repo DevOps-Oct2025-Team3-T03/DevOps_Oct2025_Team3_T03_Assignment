@@ -162,6 +162,12 @@ TELEGRAM_CHAT_ID=<chat-id>
 - `.github/workflows/dast.yml`
 - `.github/actions/notify-slack/action.yml`
 
+4. GitHub Configuration
+
+- Enable read and write permissions
+- Allow GitHub to create and approve pull requests
+- Setup the staging environment under GitHub environments
+
 ---
 
 ## CI/CD Pipeline Execution Flow
