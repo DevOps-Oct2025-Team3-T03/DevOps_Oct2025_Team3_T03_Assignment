@@ -113,19 +113,43 @@ jobs:
       - name: Telegram Notify (Success)
         if: success()
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d text=" STAGING DEPLOY SUCCESS\nRepo: ${{ github.repository }}\nVersion: ${{ steps.version.outputs.version }}"
+          $message = "STAGING DEPLOY SUCCESS`nRepo: ${{ github.repository }}`nVersion: ${{ steps.version.outputs.version }}"
+          $body = @{
+            chat_id = "${{ secrets.TELEGRAM_CHAT_ID }}"
+            text = $message
+          }
+          Invoke-RestMethod -Uri "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -Method Post -Body $body
         shell: pwsh
-
+      
       # Telegram notification — FAILURE
       - name: Telegram Notify (Failure)
         if: failure()
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-          -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -d text=" STAGING DEPLOY FAILED\nRepo: ${{ github.repository }}"
+          $message = "STAGING DEPLOY FAILED`nRepo: ${{ github.repository }}"
+          $body = @{
+            chat_id = "${{ secrets.TELEGRAM_CHAT_ID }}"
+            text = $message
+          }
+          Invoke-RestMethod -Uri "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -Method Post -Body $body
         shell: pwsh
+
+      # # Telegram notification — SUCCESS
+      # - name: Telegram Notify (Success)
+      #   if: success()
+      #   run: |
+      #     curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+      #     -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+      #     -d text=" STAGING DEPLOY SUCCESS\nRepo: ${{ github.repository }}\nVersion: ${{ steps.version.outputs.version }}"
+      #   shell: pwsh
+
+      # # Telegram notification — FAILURE
+      # - name: Telegram Notify (Failure)
+      #   if: failure()
+      #   run: |
+      #     curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+      #     -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
+      #     -d text=" STAGING DEPLOY FAILED\nRepo: ${{ github.repository }}"
+      #   shell: pwsh
         
       # Notification: DEPLOYMENT SUCCESS to DevOps Channel
       - name: Notify DevOps Channel - Deployment Success
