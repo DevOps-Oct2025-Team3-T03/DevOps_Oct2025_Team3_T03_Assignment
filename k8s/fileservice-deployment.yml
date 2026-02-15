@@ -16,6 +16,6 @@ spec:
       containers:
         - name: fileservice
           image: fileservice:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5001

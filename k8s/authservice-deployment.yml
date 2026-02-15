@@ -16,6 +16,6 @@ spec:
       containers:
         - name: authservice
           image: authservice:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
