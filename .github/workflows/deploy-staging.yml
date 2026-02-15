@@ -50,10 +50,10 @@ jobs:
       # Build Docker images
       # -f is for file, it specifies to Docker to only look at the specified file, backend/authService/Dockerfile for example
       - name: Build authService image
-        run: docker build -f backend/authService/Dockerfile -t authservice:${{ steps.version.outputs.version }} .
+        run: docker build -f backend/authService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} .
 
       - name: Build fileService image
-        run: docker build -f backend/fileService/Dockerfile -t fileservice:${{ steps.version.outputs.version }} .
+        run: docker build -f backend/fileService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} .
 
       # Deploy (example placeholder)
       #- name: Deploy to staging
@@ -64,17 +64,17 @@ jobs:
 
       # Log in to registry (Docker Hub / GHCR)
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       # Push images to registry
       - name: Push authService image
-        run: docker push authservice:${{ steps.version.outputs.version }}
+        run: docker push  ${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }}
 
       - name: Push fileService image
-        run: docker push fileservice:${{ steps.version.outputs.version }}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
 
       # Set up Kubeconfig
       - name: Set up kubeconfig
@@ -89,11 +89,17 @@ jobs:
           kubectl apply -f k8s/fileservice-deployment.yml
           kubectl apply -f k8s/services.yml
 
-      # Restart deployments to use the new image tags
-      - name: Restart deployments
+      # Update image tags in deployments
+      - name: Update deployment images
         run: |
-          kubectl rollout restart deployment authservice
-          kubectl rollout restart deployment fileservice
+          kubectl set image deployment/authservice authservice=${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }}
+          kubectl set image deployment/fileservice fileservice=${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
+      
+      # Wait for rollout to complete
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/authservice
+          kubectl rollout status deployment/fileservice
 
       # Telegram notification — SUCCESS
       - name: Telegram Notify (Success)
