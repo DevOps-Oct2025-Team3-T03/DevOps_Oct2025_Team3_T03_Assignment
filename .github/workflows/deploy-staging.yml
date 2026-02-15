@@ -50,10 +50,10 @@ jobs:
       # Build Docker images
       # -f is for file, it specifies to Docker to only look at the specified file, backend/authService/Dockerfile for example
       - name: Build authService image
-        run: docker build -f backend/authService/Dockerfile -t authservice:${{ steps.version.outputs.version }} .
+        run: docker build -f backend/authService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }} .
 
       - name: Build fileService image
-        run: docker build -f backend/fileService/Dockerfile -t fileservice:${{ steps.version.outputs.version }} .
+        run: docker build -f backend/fileService/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }} .
 
       # Deploy (example placeholder)
       #- name: Deploy to staging
@@ -71,10 +71,10 @@ jobs:
 
       # Push images to registry
       - name: Push authService image
-        run: docker push authservice:${{ steps.version.outputs.version }}
+        run: docker push  ${{ secrets.DOCKERHUB_USERNAME }}/authservice:${{ steps.version.outputs.version }}
 
       - name: Push fileService image
-        run: docker push fileservice:${{ steps.version.outputs.version }}
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/fileservice:${{ steps.version.outputs.version }}
 
       # Set up Kubeconfig
       - name: Set up kubeconfig
